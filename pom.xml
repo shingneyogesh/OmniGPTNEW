@@ -56,7 +56,7 @@
       <version>2.11.0</version>
     </dependency>
 
-    <!-- Log4j (Updated to Latest Version) -->
+    <!-- Log4j -->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
@@ -88,11 +88,28 @@
     </dependency>
 
     <!-- Apache Commons Collections -->
-   <dependency>
-    <groupId>org.apache.commons</groupId>
-    <artifactId>commons-collections4</artifactId>
-    <version>4.4</version>
-</dependency>
-
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>4.4</version>
+    </dependency>
   </dependencies>
+  
+  <build>
+    <plugins>
+      <!-- Surefire Plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.2</version>
+        <configuration>
+          <!-- Include test classes explicitly -->
+          <includes>
+            <include>**/testcases/AllScript.java</include>
+          </includes>
+          <testFailureIgnore>false</testFailureIgnore>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
