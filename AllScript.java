@@ -1,173 +1,50 @@
-package testcases;
+name: Java CI with Maven and Selenium Test Execution
 
-import com.aventstack.extentreports.ExtentTest;
-import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.openqa.selenium.*;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.annotations.Test;
-import base.BaseTest;
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-import java.io.File;
-import java.time.Duration;
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
 
-public class AllScript extends BaseTest {
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-    private static final Logger logger = LogManager.getLogger(AllScript.class);
-    private static final String BASE_URL = "http://34.28.190.18/";
-    private static final String SCREENSHOT_DIR = System.getProperty("user.dir") + "/screenshots";
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
 
-    private void captureScreenshot(ExtentTest test, String testName) {
-        try {
-            logger.info("Capturing screenshot for test: " + testName);
-            File directory = new File(SCREENSHOT_DIR);
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
-            String screenshotPath = SCREENSHOT_DIR + "/" + testName + "_" + System.currentTimeMillis() + ".png";
-            File srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            FileUtils.copyFile(srcFile, new File(screenshotPath));
-            test.addScreenCaptureFromPath(screenshotPath, "Screenshot for " + testName);
-        } catch (Exception e) {
-            logger.error("Failed to capture screenshot for test: " + testName, e);
-            test.warning("Failed to capture screenshot: " + e.getMessage());
-        }
-    }
+    - name: Install Google Chrome
+      run: |
+        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        sudo apt install ./google-chrome-stable_current_amd64.deb
 
-    @Test
-    public void executeAllTests() {
-        ExtentTest test = extent.createTest("Execute All Tests", "Combined execution of all test scenarios");
-        try {
-            logger.info("Navigating to the application URL...");
-            driver.get(BASE_URL);
-            test.info("Navigated to: " + BASE_URL);
+    - name: Install Dependencies
+      run: mvn install -DskipTests
 
-            executePromptWorkflow(test);
-            testCopyButton(test);
-            testReadAloud(test);
-            testRegeneratePrompt(test);
-            testCloseSidebar(test);
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
 
-            test.pass("All tests executed successfully.");
-        } catch (Exception e) {
-            test.fail("Error during test execution: " + e.getMessage());
-            logger.error("Error during test execution: ", e);
-        }
-    }
+    - name: Run Selenium Tests
+      run: mvn test -Dtest=testcases.AllScript -DbaseUrl=http://52.12.150.66/
 
-    private void executePromptWorkflow(ExtentTest test) {
-        try {
-            logger.info("Executing prompt workflow...");
-            test.info("Executing prompt workflow...");
-            captureScreenshot(test, "StartPromptWorkflow");
+    - name: Archive Test Reports
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-reports
+        path: target/surefire-reports/
 
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-            WebElement promptField = wait.until(ExpectedConditions.elementToBeClickable(By.id("prompt")));
-            promptField.sendKeys("write essay on India");
-            test.info("Entered prompt: 'write essay on India'");
-            captureScreenshot(test, "EnterPrompt");
-
-            WebElement enterButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id='response-container']/section[3]/div/div/button")));
-            enterButton.click();
-            test.info("Clicked the Enter button");
-            captureScreenshot(test, "ClickEnterButton");
-
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id='response-container']/section[2]")));
-            test.info("Response container is visible");
-            captureScreenshot(test, "ResponseVisible");
-
-            test.pass("Prompt workflow completed successfully.");
-        } catch (Exception e) {
-            test.fail("Prompt workflow failed: " + e.getMessage());
-            logger.error("Prompt workflow failed: ", e);
-        }
-    }
-
-    private void testCopyButton(ExtentTest test) {
-        try {
-            logger.info("Testing Copy Button...");
-            test.info("Testing Copy Button...");
-            captureScreenshot(test, "StartCopyButtonTest");
-
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-            WebElement copyButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(
-                    "//section[@class='flex-1 overflow-y-auto custom-scrollbar']//button[2]//*[name()='svg']")));
-            copyButton.click();
-            test.info("Clicked the Copy Button");
-            captureScreenshot(test, "CopyButtonClicked");
-
-            test.pass("Copy Button test completed successfully.");
-        } catch (Exception e) {
-            test.fail("Copy Button test failed: " + e.getMessage());
-            logger.error("Copy Button test failed: ", e);
-        }
-    }
-
-    private void testReadAloud(ExtentTest test) {
-        try {
-            logger.info("Testing Read Aloud functionality...");
-            test.info("Testing Read Aloud functionality...");
-            captureScreenshot(test, "StartReadAloudTest");
-
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-            WebElement readAloudButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(
-                    "/html/body/div[1]/div/div[2]/div/section[2]/section/div[1]/div[3]/button[1]/*[name()='svg']")));
-            readAloudButton.click();
-            test.info("Clicked the Read Aloud button");
-            captureScreenshot(test, "ReadAloudClicked");
-
-            WebElement stopButton = wait.until(ExpectedConditions.elementToBeClickable((By.xpath(
-                    "//*[@id='response-container']/section[2]/section/div[1]/div[3]/button[1]/span"))));
-            stopButton.click();
-            test.info("Stopped Read Aloud");
-            captureScreenshot(test, "ReadAloudStopped");
-
-            test.pass("Read Aloud test completed successfully.");
-        } catch (Exception e) {
-            test.fail("Read Aloud test failed: " + e.getMessage());
-            logger.error("Read Aloud test failed: ", e);
-        }
-    }
-
-    private void testRegeneratePrompt(ExtentTest test) {
-        try {
-            logger.info("Testing Regenerate Prompt...");
-            test.info("Testing Regenerate Prompt...");
-            captureScreenshot(test, "StartRegeneratePromptTest");
-
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-            WebElement regenerateButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(
-                    "//button[@class='text-gray-400 mr-3']//*[name()='svg']")));
-            regenerateButton.click();
-            test.info("Clicked the Regenerate Prompt button");
-            captureScreenshot(test, "RegeneratePromptClicked");
-
-            test.pass("Regenerate Prompt test completed successfully.");
-        } catch (Exception e) {
-            test.fail("Regenerate Prompt test failed: " + e.getMessage());
-            logger.error("Regenerate Prompt test failed: ", e);
-        }
-    }
-
-    private void testCloseSidebar(ExtentTest test) {
-        try {
-            logger.info("Testing Close Sidebar...");
-            test.info("Testing Close Sidebar...");
-            captureScreenshot(test, "StartCloseSidebarTest");
-
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-            WebElement closeSidebarButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(
-                    "//*[@id='response-container']/section[1]/nav/div[1]/div[1]/button[1]")));
-            closeSidebarButton.click();
-            test.info("Clicked the Close Sidebar button");
-            captureScreenshot(test, "CloseSidebarClicked");
-
-            test.pass("Close Sidebar test completed successfully.");
-        } catch (Exception e) {
-            test.fail("Close Sidebar test failed: " + e.getMessage());
-            logger.error("Close Sidebar test failed: ", e);
-        }
-    }
-}
+    - name: Archive Screenshots
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: screenshots
+        path: screenshots/
