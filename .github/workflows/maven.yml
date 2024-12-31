@@ -33,7 +33,7 @@ jobs:
       run: mvn -B package --file pom.xml
 
     - name: Run Selenium Tests
-      run: mvn test -Dtest=testcases.AllScriptTest
+      run: mvn test -Dtest=testcases.AllScript -DbaseUrl=http://52.12.150.66/
 
     - name: Archive Test Reports
       if: always()
