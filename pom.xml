@@ -3,7 +3,7 @@
   <groupId>Omninura.ai</groupId>
   <artifactId>OmiGPT</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  
+
   <dependencies>
     <!-- Selenium -->
     <dependency>
@@ -11,7 +11,7 @@
       <artifactId>selenium-java</artifactId>
       <version>4.27.0</version>
     </dependency>
-    
+
     <!-- TestNG -->
     <dependency>
       <groupId>org.testng</groupId>
@@ -26,7 +26,7 @@
       <artifactId>extentreports</artifactId>
       <version>5.1.2</version>
     </dependency>
-    
+
     <!-- Apache POI -->
     <dependency>
       <groupId>org.apache.poi</groupId>
@@ -94,7 +94,7 @@
       <version>4.4</version>
     </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <!-- Surefire Plugin -->
