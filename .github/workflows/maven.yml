@@ -53,4 +53,4 @@ jobs:
     - name: Build and Run Selenium Test
       run: |
         mvn clean package
-        java -cp target/selenium-demo-1.0-SNAPSHOT.jar Finish
+        java -cp target/OmiGPT-0.0.1-SNAPSHOT.jar src/main/java/Finish
