@@ -16,64 +16,49 @@ public class Finish {
         WebDriverManager.chromedriver().setup();
 
         WebDriver driver = new ChromeDriver();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         try {
             driver.get("https://www.saucedemo.com/");
-            Thread.sleep(5000);
-
-            WebElement usernameField = driver.findElement(By.cssSelector("#user-name"));
+            
+            // Login process
+            WebElement usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#user-name")));
             usernameField.sendKeys("standard_user");
 
-            Thread.sleep(5000);
-
-            WebElement passwordField = driver.findElement(By.cssSelector("#password"));
+            WebElement passwordField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#password")));
             passwordField.sendKeys("secret_sauce");
 
-            Thread.sleep(5000);
-
-            WebElement loginButton = driver.findElement(By.cssSelector("#login-button"));
+            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#login-button")));
             loginButton.click();
-            Thread.sleep(5000);
 
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
             wait.until(ExpectedConditions.urlToBe("https://www.saucedemo.com/inventory.html"));
 
-            Thread.sleep(5000);
-
+            // Add product to cart
             WebElement addToCartButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@data-test='add-to-cart-sauce-labs-backpack']")));
             addToCartButton.click();
-            Thread.sleep(5000);
 
+            // Go to cart
             WebElement cartIcon = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".shopping_cart_link")));
             cartIcon.click();
-            Thread.sleep(5000);
 
+            // Proceed to checkout
             WebElement checkoutButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".btn_action.checkout_button")));
             checkoutButton.click();
-            Thread.sleep(5000);
 
+            // Fill in personal information
             WebElement firstNameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("first-name")));
             firstNameField.sendKeys("Yogesh");
-
-            Thread.sleep(5000);
 
             WebElement lastNameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("last-name")));
             lastNameField.sendKeys("Shingne");
 
-            Thread.sleep(5000);
-
             WebElement postalCodeField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("postal-code")));
             postalCodeField.sendKeys("431203");
 
-            Thread.sleep(5000);
-
+            // Continue to review page
             WebElement continueButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".btn_primary.cart_button")));
             ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", continueButton);
-            Thread.sleep(5000);
-
             continueButton.click();
-
-            Thread.sleep(5000);
 
         } catch (Exception e) {
             e.printStackTrace();
