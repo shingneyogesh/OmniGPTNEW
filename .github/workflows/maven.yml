@@ -1,4 +1,4 @@
-name: Selenium Test
+name: Selenium Test with Chrome
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Set up Java
+    - name: Install Java
       uses: actions/setup-java@v4
       with:
         java-version: '17'
@@ -32,9 +32,23 @@ jobs:
       run: |
         CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1)
         echo "Detected Chrome major version: $CHROME_VERSION"
-        wget -q "https://chromedriver.storage.googleapis.com/${CHROME_VERSION}.0/chromedriver_linux64.zip" || exit 1
+        
+        # Validate Chrome version format
+        if [[ ! $CHROME_VERSION =~ ^[0-9]+$ ]]; then
+          echo "Invalid Chrome version detected: $CHROME_VERSION"
+          exit 1
+        fi
+        
+        # Download matching ChromeDriver version
+        wget -q "https://chromedriver.storage.googleapis.com/${CHROME_VERSION}.0/chromedriver_linux64.zip" || {
+          echo "Failed to download ChromeDriver for version $CHROME_VERSION. Using fallback version."
+          wget -q "https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip"
+        }
         unzip chromedriver_linux64.zip -d /usr/local/bin/
         chmod +x /usr/local/bin/chromedriver
+
+    - name: Verify ChromeDriver Installation
+      run: chromedriver --version
 
     - name: Build and Run Selenium Test
       run: |
