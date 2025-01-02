@@ -1,4 +1,4 @@
-name: Run Selenium Tests
+name: Selenium Test
 
 on:
   push:
@@ -11,33 +11,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
+    - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Set up JDK 17
+    - name: Set up Java
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: maven
 
     - name: Install Chrome
       run: |
         sudo apt-get update
-        sudo apt-get install -y wget unzip
+        sudo apt-get install -y wget
         wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
         sudo apt install -y ./google-chrome-stable_current_amd64.deb
-        google-chrome --version # Validate Chrome installation
+        google-chrome --version
 
     - name: Install Chromedriver
       run: |
         CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1)
-        echo "Detected Chrome version: $CHROME_VERSION"
-        wget -q https://chromedriver.storage.googleapis.com/$CHROME_VERSION.0/chromedriver_linux64.zip
+        echo "Detected Chrome major version: $CHROME_VERSION"
+        wget -q "https://chromedriver.storage.googleapis.com/${CHROME_VERSION}.0/chromedriver_linux64.zip" || exit 1
         unzip chromedriver_linux64.zip -d /usr/local/bin/
         chmod +x /usr/local/bin/chromedriver
 
-    - name: Build Project and Run Test
+    - name: Build and Run Selenium Test
       run: |
         mvn clean package
-        java -cp target/selenium-demo-1.0-SNAPSHOT.jar tests.Finish
+        java -cp target/selenium-demo-1.0-SNAPSHOT.jar Finish
