@@ -129,6 +129,16 @@
           <target>${maven.compiler.target}</target>
         </configuration>
       </plugin>
+
+      <!-- Exec Plugin to run the Finish.java main class -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <mainClass>Finish</mainClass>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
