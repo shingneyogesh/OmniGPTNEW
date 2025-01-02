@@ -1,13 +1,13 @@
-name: Java CI with Maven and Selenium Test Execution
+name: Run Selenium Tests
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
-  build-and-test:
+  selenium-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,30 +21,21 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: Install Google Chrome
+    - name: Install Chrome
       run: |
-        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        sudo apt install ./google-chrome-stable_current_amd64.deb
+        sudo apt-get update
+        sudo apt-get install -y wget unzip
+        wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        sudo apt install -y ./google-chrome-stable_current_amd64.deb
 
-    - name: Install Dependencies
-      run: mvn install -DskipTests
+    - name: Install Chromedriver
+      run: |
+        CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1)
+        wget -q https://chromedriver.storage.googleapis.com/$CHROME_VERSION.0/chromedriver_linux64.zip
+        unzip chromedriver_linux64.zip -d /usr/local/bin/
+        chmod +x /usr/local/bin/chromedriver
 
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
-
-    - name: Run Selenium Tests
-      run: mvn test -Dtest=testcases.AllScript -DbaseUrl=http://35.91.14.64/
-
-    - name: Archive Test Reports
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-reports
-        path: target/surefire-reports/
-
-    - name: Archive Screenshots
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: screenshots
-        path: screenshots/
+    - name: Build Project and Run Test
+      run: |
+        mvn clean package
+        java -cp target/selenium-demo-1.0-SNAPSHOT.jar tests.Finish
