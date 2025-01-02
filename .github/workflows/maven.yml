@@ -50,7 +50,8 @@ jobs:
     - name: Verify ChromeDriver Installation
       run: chromedriver --version
 
-    - name: Build and Run Selenium Test
-      run: src/main/java/Finish.java
-        mvn clean package
-        java -cp target/OmiGPT-0.0.1-SNAPSHOT.jar src/main/java/Finish
+    - name: Build the project
+      run: mvn clean package
+
+    - name: Run Selenium Test
+      run: java -cp target/OmiGPT-0.0.1-SNAPSHOT.jar Finish
